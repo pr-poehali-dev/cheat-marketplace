@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 
 const games = [
-  { id: 1, name: 'CS2', icon: '🎯', features: ['Aimbot', 'ESP', 'Radar'], status: 'Undetected' },
-  { id: 2, name: 'Valorant', icon: '⚡', features: ['Wallhack', 'Triggerbot', 'Glow'], status: 'Undetected' },
-  { id: 3, name: 'Apex Legends', icon: '🔫', features: ['No Recoil', 'ESP', 'Aim Assist'], status: 'Undetected' },
-  { id: 4, name: 'Fortnite', icon: '🏆', features: ['Aimbot', 'ESP', 'Skeleton'], status: 'Undetected' },
-  { id: 5, name: 'Warzone', icon: '💣', features: ['UAV', 'ESP', 'Aimbot'], status: 'Undetected' },
-  { id: 6, name: 'Rust', icon: '🛡️', features: ['ESP', 'Aimbot', 'No Recoil'], status: 'Undetected' },
+  { id: 1, name: 'CS2', icon: '🎯', features: ['Aimbot', 'ESP', 'Radar'], status: 'Undetected', description: 'Полный набор функций для Counter-Strike 2', detailedFeatures: ['Advanced Aimbot с настройкой FOV', 'ESP с отображением здоровья', 'Radar hack', 'No Recoil', 'Bunny Hop'] },
+  { id: 2, name: 'Valorant', icon: '⚡', features: ['Wallhack', 'Triggerbot', 'Glow'], status: 'Undetected', description: 'Безопасные читы для Valorant с защитой от Vanguard', detailedFeatures: ['Wallhack через текстуры', 'Triggerbot с задержкой', 'Glow ESP', 'Agent ESP', 'Recoil Control'] },
+  { id: 3, name: 'Apex Legends', icon: '🔫', features: ['No Recoil', 'ESP', 'Aim Assist'], status: 'Undetected', description: 'Улучшенные возможности для Apex Legends', detailedFeatures: ['No Recoil Script', 'Player ESP', 'Item ESP', 'Distance Calculator', 'Aim Assist'] },
+  { id: 4, name: 'Fortnite', icon: '🏆', features: ['Aimbot', 'ESP', 'Skeleton'], status: 'Undetected', description: 'Читы для Fortnite с обходом Easy Anti-Cheat', detailedFeatures: ['Silent Aimbot', 'Player ESP', 'Skeleton ESP', 'Loot ESP', 'Vehicle ESP'] },
+  { id: 5, name: 'Warzone', icon: '💣', features: ['UAV', 'ESP', 'Aimbot'], status: 'Undetected', description: 'Мощные читы для Call of Duty Warzone', detailedFeatures: ['Permanent UAV', 'Player ESP', 'Advanced Aimbot', 'Vehicle ESP', 'Weapon ESP'] },
+  { id: 6, name: 'Rust', icon: '🛡️', features: ['ESP', 'Aimbot', 'No Recoil'], status: 'Undetected', description: 'Читы для выживания в Rust', detailedFeatures: ['Player ESP', 'Animal ESP', 'Aimbot', 'No Recoil', 'Resource ESP'] },
 ];
 
 const plans = [
@@ -37,6 +41,41 @@ const reviews = [
 
 export default function Index() {
   const [selectedGame, setSelectedGame] = useState<number | null>(null);
+  const [isPurchaseOpen, setIsPurchaseOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('week');
+  const [email, setEmail] = useState('');
+  const [isGameDetailOpen, setIsGameDetailOpen] = useState(false);
+  const [currentGameDetail, setCurrentGameDetail] = useState<number | null>(null);
+  
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fade-in');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    
+    const sections = document.querySelectorAll('.animate-on-scroll');
+    sections.forEach((section) => observerRef.current?.observe(section));
+    
+    return () => observerRef.current?.disconnect();
+  }, []);
+  
+  const handlePurchase = () => {
+    console.log('Purchase:', { game: selectedGame, plan: selectedPlan, email });
+    setIsPurchaseOpen(false);
+  };
+  
+  const openGameDetail = (gameId: number) => {
+    setCurrentGameDetail(gameId);
+    setIsGameDetailOpen(true);
+  };
 
   return (
     <div className="min-h-screen">
@@ -55,7 +94,7 @@ export default function Index() {
             <a href="#reviews" className="text-sm hover:text-primary transition-colors">Отзывы</a>
             <a href="#contact" className="text-sm hover:text-primary transition-colors">Контакты</a>
           </nav>
-          <Button>
+          <Button onClick={() => setIsPurchaseOpen(true)}>
             <Icon name="ShoppingCart" className="w-4 h-4 mr-2" />
             Купить
           </Button>
@@ -76,7 +115,7 @@ export default function Index() {
             Поддержка 24/7 и мгновенная выдача лицензий.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg">
+            <Button size="lg" className="text-lg" onClick={() => setIsPurchaseOpen(true)}>
               <Icon name="Download" className="w-5 h-5 mr-2" />
               Начать сейчас
             </Button>
@@ -88,7 +127,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="games" className="container mx-auto px-4 py-20">
+      <section id="games" className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="text-center mb-12">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">Поддерживаемые игры</h3>
           <p className="text-muted-foreground">Выберите вашу игру и получите доступ к лучшим функциям</p>
@@ -98,7 +137,6 @@ export default function Index() {
             <Card 
               key={game.id} 
               className="hover:border-primary/50 transition-all cursor-pointer hover:scale-105"
-              onClick={() => setSelectedGame(game.id)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
@@ -120,7 +158,7 @@ export default function Index() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">
+                <Button className="w-full" onClick={() => openGameDetail(game.id)}>
                   <Icon name="Eye" className="w-4 h-4 mr-2" />
                   Подробнее
                 </Button>
@@ -130,7 +168,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="pricing" className="container mx-auto px-4 py-20 bg-gradient-to-b from-card/50 to-background">
+      <section id="pricing" className="container mx-auto px-4 py-20 bg-gradient-to-b from-card/50 to-background animate-on-scroll">
         <div className="text-center mb-12">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">Тарифные планы</h3>
           <p className="text-muted-foreground">Выберите оптимальный период лицензии</p>
@@ -172,7 +210,14 @@ export default function Index() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
+                <Button 
+                  className="w-full" 
+                  variant={plan.popular ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSelectedPlan(plan.id);
+                    setIsPurchaseOpen(true);
+                  }}
+                >
                   <Icon name="CreditCard" className="w-4 h-4 mr-2" />
                   Выбрать план
                 </Button>
@@ -182,7 +227,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="faq" className="container mx-auto px-4 py-20">
+      <section id="faq" className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="text-center mb-12">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">Частые вопросы</h3>
           <p className="text-muted-foreground">Ответы на популярные вопросы</p>
@@ -199,7 +244,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="reviews" className="container mx-auto px-4 py-20 bg-gradient-to-b from-background to-card/50">
+      <section id="reviews" className="container mx-auto px-4 py-20 bg-gradient-to-b from-background to-card/50 animate-on-scroll">
         <div className="text-center mb-12">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">Отзывы клиентов</h3>
           <p className="text-muted-foreground">Что говорят наши пользователи</p>
@@ -223,7 +268,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="contact" className="container mx-auto px-4 py-20">
+      <section id="contact" className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="max-w-2xl mx-auto text-center">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">Поддержка 24/7</h3>
           <p className="text-muted-foreground mb-8">
@@ -269,6 +314,117 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      <Dialog open={isPurchaseOpen} onOpenChange={setIsPurchaseOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Оформление покупки</DialogTitle>
+            <DialogDescription>
+              Выберите игру и тариф для получения лицензионного ключа
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="game">Игра</Label>
+              <Select value={selectedGame?.toString() || ''} onValueChange={(v) => setSelectedGame(Number(v))}>
+                <SelectTrigger id="game">
+                  <SelectValue placeholder="Выберите игру" />
+                </SelectTrigger>
+                <SelectContent>
+                  {games.map((game) => (
+                    <SelectItem key={game.id} value={game.id.toString()}>
+                      {game.icon} {game.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="plan">Тариф</Label>
+              <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                <SelectTrigger id="plan">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {plans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} - {plan.price}₽
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handlePurchase} className="w-full">
+              <Icon name="CreditCard" className="w-4 h-4 mr-2" />
+              Перейти к оплате
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isGameDetailOpen} onOpenChange={setIsGameDetailOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          {currentGameDetail && games.find(g => g.id === currentGameDetail) && (() => {
+            const game = games.find(g => g.id === currentGameDetail)!;
+            return (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-4xl">{game.icon}</span>
+                    <div>
+                      <DialogTitle className="text-2xl">{game.name}</DialogTitle>
+                      <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20 mt-1">
+                        {game.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <DialogDescription className="text-base">
+                    {game.description}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Icon name="List" className="w-4 h-4" />
+                    Полный список функций:
+                  </h4>
+                  <div className="space-y-2">
+                    {game.detailedFeatures?.map((feature, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <Icon name="Check" className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button 
+                    onClick={() => {
+                      setIsGameDetailOpen(false);
+                      setIsPurchaseOpen(true);
+                    }} 
+                    className="w-full"
+                  >
+                    <Icon name="ShoppingCart" className="w-4 h-4 mr-2" />
+                    Купить сейчас
+                  </Button>
+                </DialogFooter>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
