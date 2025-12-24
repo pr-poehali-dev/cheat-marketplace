@@ -68,7 +68,17 @@ export default function Index() {
   }, []);
   
   const handlePurchase = () => {
-    console.log('Purchase:', { game: selectedGame, plan: selectedPlan, email });
+    if (!selectedGame || !email) {
+      alert('Пожалуйста, выберите игру и укажите email');
+      return;
+    }
+    
+    const selectedGameData = games.find(g => g.id === selectedGame);
+    const selectedPlanData = plans.find(p => p.id === selectedPlan);
+    
+    const telegramUrl = `https://t.me/send?start=IVRZfHeit1h7&text=Заказ:%20${selectedGameData?.name}%20-%20${selectedPlanData?.name}%20(${selectedPlanData?.price}₽)%0AEmail:%20${email}`;
+    
+    window.open(telegramUrl, '_blank');
     setIsPurchaseOpen(false);
   };
   
@@ -365,11 +375,23 @@ export default function Index() {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={handlePurchase} className="w-full">
-              <Icon name="CreditCard" className="w-4 h-4 mr-2" />
-              Перейти к оплате
+          <DialogFooter className="flex-col gap-3">
+            <div className="w-full space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Итого:</span>
+                <span className="text-lg font-bold">
+                  {plans.find(p => p.id === selectedPlan)?.price}₽
+                </span>
+              </div>
+            </div>
+            <Button onClick={handlePurchase} className="w-full" size="lg">
+              <Icon name="Send" className="w-4 h-4 mr-2" />
+              Оплатить через Telegram
             </Button>
+            <div className="flex items-center gap-2 justify-center text-xs text-muted-foreground">
+              <Icon name="Shield" className="w-3 h-3" />
+              Безопасная оплата через криптобот
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
